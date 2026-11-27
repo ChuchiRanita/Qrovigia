@@ -95,3 +95,6 @@ apps/
 
 - `npm run dev`: inicia frontend y backend en modo desarrollo.
 - `npm run build`: compila ambos workspaces.
+
+### Prueba cambio Sebas
+hola c:
