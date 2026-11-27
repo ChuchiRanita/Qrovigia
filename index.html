@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analizador de enlaces y mensajes — Protección Ciudadana</title>
+  <style>
+    :root {
+      --bg: #f6f8fa;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --teal: #0f766e;
+      --teal-hover: #115e59;
+      --danger-bg: #fef2f2;
+      --danger-border: #fecaca;
+      --danger-text: #991b1b;
+      --warn-bg: #fffbeb;
+      --warn-border: #fde68a;
+      --warn-text: #92400e;
+      --ok-bg: #f0fdf4;
+      --ok-border: #bbf7d0;
+      --ok-text: #166534;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    }
+
+    .icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #ccfbf1;
+      color: var(--teal);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+      color: var(--text);
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    button {
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      height: 44px;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--teal-hover);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .helper {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    .preview-box {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .preview-box.show {
+      display: block;
+    }
+
+    .preview-box img {
+      max-width: 100%;
+      max-height: 240px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    .result-box {
+      margin-top: 22px;
+      border-radius: 10px;
+      padding: 18px 20px;
+      border: 1px solid transparent;
+      display: none;
+    }
+
+    .result-box.show { display: block; }
+
+    .result-box.error {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
+    }
+
+    .result-box.warn {
+      background: var(--warn-bg);
+      border-color: var(--warn-border);
+      color: var(--warn-text);
+    }
+
+    .result-box.ok {
+      background: var(--ok-bg);
+      border-color: var(--ok-border);
+      color: var(--ok-text);
+    }
+
+    .result-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .result-rec {
+      margin-top: 10px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .signals-list {
+      margin-top: 8px;
+      padding-left: 18px;
+      font-size: 13px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat-item {
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .stat-item strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <p class="kicker">Protección Ciudadana</p>
+    <h1>Analizador de enlaces y mensajes</h1>
+    <p class="subtitle">Identifica señales comunes de phishing, fraudes y suplantación institucional.</p>
+
+    <section class="card">
+      <div class="icon-box">↗</div>
+      <h2>¿Este enlace o mensaje es confiable?</h2>
+      <p class="card-desc">Revisa una dirección web o sube una captura de pantalla de un mensaje o correo antes de abrirlo.</p>
+
+      <form id="analyzeForm">
+        <label for="urlInput">URL a analizar</label>
+        <div class="form-row">
+          <input
+            id="urlInput"
+            type="text"
+            value="https://example.com"
+            placeholder="https://ejemplo.com"
+            required
+          />
+          <button id="submitBtn" type="submit">Analizar enlace</button>
+        </div>
+        <p class="helper">
+          Consulta reputación de URLs a través del servidor local conectado a VirusTotal y verifica patrones de suplantación.
+        </p>
+      </form>
+
+      <hr class="divider" />
+
+      <div>
+        <label for="imgInput">O sube la imagen de un mensaje o correo</label>
+        <input id="imgInput" type="file" accept="image/*" />
+        <div id="previewBox" class="preview-box">
+          <img id="previewImg" alt="Vista previa de la captura" />
+        </div>
+        <button id="analyzeImgBtn" type="button" style="margin-top: 12px;">
+          ¿Debo abrirlo? Analizar con IA
+        </button>
+        <p class="helper">
+          La IA revisa el texto y contexto visual de la captura para darte una recomendación antes de abrir enlaces o responder.
+        </p>
+      </div>
+
+      <div id="resultBox" class="result-box" role="alert">
+        <div id="resultTitle" class="result-title"></div>
+        <div id="resultMessage"></div>
+        <ul id="signalsList" class="signals-list"></ul>
+        <div id="resultRec" class="result-rec"></div>
+        <div id="statsGrid" class="stats-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "http://localhost:3001";
+
+    const form = document.getElementById("analyzeForm");
+    const urlInput = document.getElementById("urlInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const imgInput = document.getElementById("imgInput");
+    const previewBox = document.getElementById("previewBox");
+    const previewImg = document.getElementById("previewImg");
+    const analyzeImgBtn = document.getElementById("analyzeImgBtn");
+
+    const resultBox = document.getElementById("resultBox");
+    const resultTitle = document.getElementById("resultTitle");
+    const resultMessage = document.getElementById("resultMessage");
+    const signalsList = document.getElementById("signalsList");
+    const resultRec = document.getElementById("resultRec");
+    const statsGrid = document.getElementById("statsGrid");
+
+    function normalizarUrl(raw) {
+      const trimmed = raw.trim();
+      if (!/^https?:\/\//i.test(trimmed)) {
+        return `https://${trimmed}`;
+      }
+      return trimmed;
+    }
+
+    function mostrarEstado(tipo, titulo, mensaje, opciones = {}) {
+      const { stats = null, senales = [], recomendacion = "" } = opciones;
+      resultBox.className = `result-box show ${tipo}`;
+      resultTitle.textContent = titulo;
+      resultMessage.textContent = mensaje;
+      signalsList.innerHTML = "";
+      resultRec.textContent = recomendacion ? `Recomendación: ${recomendacion}` : "";
+      statsGrid.innerHTML = "";
+
+      if (Array.isArray(senales) && senales.length > 0) {
+        for (const s of senales) {
+          const li = document.createElement("li");
+          li.textContent = s;
+          signalsList.appendChild(li);
+        }
+      }
+
+      if (stats) {
+        const etiquetas = [
+          ["Maliciosos", stats.malicious ?? 0],
+          ["Sospechosos", stats.suspicious ?? 0],
+          ["Seguros", stats.harmless ?? 0],
+          ["Sin clasificar", stats.undetected ?? 0],
+        ];
+
+        for (const [label, valor] of etiquetas) {
+          const item = document.createElement("div");
+          item.className = "stat-item";
+          item.innerHTML = `<strong>${valor}</strong><span>${label}</span>`;
+          statsGrid.appendChild(item);
+        }
+      }
+    }
+
+    function construirRecomendacionUrl(url, stats) {
+      const maliciosos = stats.malicious ?? 0;
+      const sospechosos = stats.suspicious ?? 0;
+      const posibleSuplantacion =
+        /(gob|gobierno|verificacion|soporte|banco|seguridad)/i.test(url) &&
+        !/\.gob\./i.test(url);
+
+      if (maliciosos > 0) {
+        return {
+          tipo: "error",
+          titulo: "No abras este enlace",
+          mensaje: `Fue marcado como malicioso por ${maliciosos} motor(es) de seguridad.`,
+          recomendacion:
+            "Evita entrar al sitio, no ingreses datos personales ni contraseñas y verifica el trámite por un canal oficial."
+        };
+      }
+
+      if (sospechosos > 0 || posibleSuplantacion) {
+        return {
+          tipo: "warn",
+          titulo: "Revisa con precaución",
+          mensaje: posibleSuplantacion
+            ? "El enlace incluye términos institucionales o de verificación fuera de un dominio .gob oficial."
+            : "Uno o más motores marcaron señales sospechosas para esta URL.",
+          recomendacion:
+            "Confirma la dirección oficial escribiéndola tú mismo o consultando la página institucional antes de continuar."
+        };
+      }
+
+      return {
+        tipo: "ok",
+        titulo: "Sin detecciones maliciosas en el análisis",
+        mensaje: "Los motores consultados no reportaron amenazas para este enlace.",
+        recomendacion:
+          "Mantén precaución si el enlace llegó de un remitente desconocido o por un mensaje urgente."
+      };
+    }
+
+    async function esperarResultado(analysisId) {
+      for (let i = 0; i < 8; i++) {
+        const res = await fetch(`${API_BASE}/api/resultado/${encodeURIComponent(analysisId)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Error al consultar el resultado");
+        }
+
+        if (data.status === "completed") {
+          return data.stats;
+        }
+
+        mostrarEstado(
+          "warn",
+          "Analizando enlace...",
+          `Consultando motores de seguridad (intento ${i + 1} de 8).`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+      }
+
+      throw new Error("El análisis sigue en proceso. Intenta de nuevo en unos segundos.");
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const url = normalizarUrl(urlInput.value);
+      urlInput.value = url;
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Analizando...";
+      mostrarEstado("warn", "Enviando URL...", "Conectando con el servidor local.");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/analizar`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "No se pudo iniciar el análisis");
+        }
+
+        const stats = await esperarResultado(data.analysisId);
+        const rec = construirRecomendacionUrl(url, stats);
+
+        mostrarEstado(rec.tipo, rec.titulo, rec.mensaje, {
+          stats,
+          recomendacion: rec.recomendacion,
+        });
+      } catch (err) {
+        mostrarEstado("error", "No se pudo analizar", err.message || "Error de conexión");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Analizar enlace";
+      }
+    });
+
+    imgInput.addEventListener("change", () => {
+      const file = imgInput.files?.[0];
+      if (!file) {
+        previewBox.classList.remove("show");
+        return;
+      }
+      previewImg.src = URL.createObjectURL(file);
+      previewBox.classList.add("show");
+    });
+
+    function leerArchivoComoBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(",")[1];
+          resolve({ base64, mimeType: file.type || "image/png" });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    analyzeImgBtn.addEventListener("click", async () => {
+      const file = imgInput.files?.[0];
+      if (!file) {
+        mostrarEstado(
+          "warn",
+          "Selecciona una imagen",
+          "Sube primero una captura de pantalla de un mensaje o correo."
+        );
+        return;
+      }
+
+      analyzeImgBtn.disabled = true;
+      analyzeImgBtn.textContent = "Analizando con IA...";
+      mostrarEstado("warn", "Analizando imagen...", "La IA está revisando si conviene abrir este mensaje o correo.");
+
+      try {
+        const { base64, mimeType } = await leerArchivoComoBase64(file);
+
+        const res = await fetch(`${API_BASE}/api/analizar-imagen`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64: base64, mimeType }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || "Error al analizar la imagen");
+        }
+
+        const tipo =
+          data.decision === "NO_ABRIR"
+            ? "error"
+            : data.decision === "PRECAUCION"
+            ? "warn"
+            : "ok";
+
+        mostrarEstado(tipo, data.titulo || "Evaluación de mensaje", data.resumen || "", {
+          senales: data.senales || [],
+          recomendacion: data.recomendacion || "",
+        });
+      } catch (err) {
+        mostrarEstado("error", "No se pudo analizar la imagen", err.message || "Error de conexión");
+      } finally {
+        analyzeImgBtn.disabled = false;
+        analyzeImgBtn.textContent = "¿Debo abrirlo? Analizar con IA";
+      }
+    });
+  </script>
+</body>
+</html>
